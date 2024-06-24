@@ -33,6 +33,13 @@ public class MemberRepository {
                 .setParameter("id", id)
                 .getResultList();
     }
+	
+	public Member findByName(String name) {
+		List<Member> member = em.createQuery("select m from Member m where m.name = :name", Member.class)
+                .setParameter("name", name)
+                .getResultList();
+		return member.get(0);
+	}
 
 	
 	public void deleteById(String id) {

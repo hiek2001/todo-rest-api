@@ -9,10 +9,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.example.demo.config.jwt.JwtTokenProvider;
 import com.example.demo.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -23,19 +25,20 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 	
-//	@Bean
-//	CorsConfigurationSource corsConfigurationSource() {
-//		CorsConfiguration configuration = new CorsConfiguration();
-//		configuration.addAllowedOriginPattern("*");
-//		configuration.addAllowedHeader("*");
-//		configuration.addAllowedMethod("*");
-//		configuration.addExposedHeader("*");
-//		configuration.setAllowCredentials(true);
-//		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//		source.registerCorsConfiguration("/**", configuration);
-//		return source;
-//	}
-
+	private final JwtTokenProvider jwtTokenProvider;
+	
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.addAllowedOriginPattern("*");
+		configuration.addAllowedHeader("*");
+		configuration.addAllowedMethod("*");
+		configuration.addExposedHeader("*");
+		configuration.setAllowCredentials(true);
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
 	
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
@@ -47,17 +50,17 @@ public class WebSecurityConfig {
 	        .formLogin().disable()
 	        .headers().frameOptions().disable()
 	        .and()
+	        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+	        .and()
+	        //.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
 	        .authorizeRequests()
-	        .antMatchers("/api/v1/**")
-	        .permitAll();
+	        .antMatchers("/api/v1/members/login", "/api/v1/members/join","/api/v1/**").permitAll()
+	        .anyRequest().authenticated()
+	        ;
 		
 		return http.build();      
 	}
 	
-//	@Bean
-//	public AuthenticationManager authenticationManagerBean() throws Exception{
-//		 return authenticationManagerBean();
-//	}
 	
 	@Bean
 	public AuthenticationManager authenticationManager() {

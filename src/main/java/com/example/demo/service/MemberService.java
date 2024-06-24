@@ -7,6 +7,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.demo.config.jwt.JwtTokenProvider;
+import com.example.demo.exception.LoginFailureException;
+import com.example.demo.model.dto.MemberLoginResponseDto;
 import com.example.demo.model.entity.Member;
 import com.example.demo.repository.MemberRepository;
 import com.example.demo.util.ObjectUtil;
@@ -21,6 +24,8 @@ public class MemberService {
 	private final MemberRepository memberRepository;
 	
 	private final BCryptPasswordEncoder passwordEncoder;
+	
+
 	
 	/**
 	 * 회원가입
@@ -59,6 +64,19 @@ public class MemberService {
 		
 		return false;
 	}
+	
+//	@Transactional
+//	public MemberLoginResponseDto login(Member member) throws Exception {
+//		Member findMembers = memberRepository.findById(member.getId()).get(0);
+//		
+////		if(!passwordEncoder.matches(member.getPassword(), findMembers.getPassword())) {
+////			return new LoginFailureException();
+////		}
+//		
+//		return new MemberLoginResponseDto(member.getId(), jwtTokenProvider.createToken(member.getId()));
+//	}
+	
+
 
 	/**
 	 * 회원 탈퇴

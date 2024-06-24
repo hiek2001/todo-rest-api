@@ -4,6 +4,10 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+  jwt:
+    secret-key: de09bf3207be008eedc9e687175d0f6d367acf6892ed56731845dde1fc42fe433ac213ef82460226289b97fa2013848eab0d8a977a16193b3774879c0411d19b
+    password: hiek2001codinglikeithiek2001codinglikeit
+
 
   jpa:
     hibernate:

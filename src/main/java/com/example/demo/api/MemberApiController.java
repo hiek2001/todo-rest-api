@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.config.jwt.JwtTokenProvider;
+import com.example.demo.model.dto.MemberLoginResponseDto;
 import com.example.demo.model.entity.Member;
 import com.example.demo.model.vo.ResponseVO;
 import com.example.demo.service.MemberService;
@@ -34,8 +36,8 @@ public class MemberApiController {
 	
 	private final MemberService memberService;
 	
-	@Autowired
-	private AuthenticationManager authenticationManager;
+	private final JwtTokenProvider jwtTokenProvider;
+	
 	
 	/**
 	 * 회원 가입
@@ -72,30 +74,22 @@ public class MemberApiController {
 	 * @return
 	 */
     @PostMapping(value="/login", produces="application/json")
-    public ResponseEntity<ResponseVO> getMemberId(HttpServletRequest request, @RequestBody Member member) {	
+    public ResponseEntity<ResponseVO> getMemberId(@RequestBody Member member) {	
 		try {
-			// 세션 처리
-			if(member != null) {
-				HttpSession session = request.getSession();
-	            session.setAttribute("loginMember", member);
-	            session.setMaxInactiveInterval(60 * 30);
-			}
 			
-			// 정보 확인
 			boolean isAuthenticated = memberService.login(member);
+			//MemberLoginResponseDto reponseDto = memberService.login(member);
 			
 			if(isAuthenticated) {
-//				saveContext(member.getId());
-				// 세션 등록
-//				Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(member.getId(), member.getPassword()));
-//				SecurityContextHolder.getContext().setAuthentication(authentication);
-				
+				String token = jwtTokenProvider.createToken(member.getId());
+				MemberLoginResponseDto responseDto = new MemberLoginResponseDto(member.getId(), token);
+				System.out.println("responseDto ::"+responseDto);
 				
 	            return ResponseEntity.ok(
 	                ResponseVO.builder()
 	                    .statusCode(200)
 	                    .message("로그인이 완료되었습니다.")
-	                    .data(member)
+	                    .data(responseDto)
 	                    .build()
 	            );
 	    	} else {
@@ -122,8 +116,9 @@ public class MemberApiController {
 
     
     @DeleteMapping(value="/{id}", produces="application/json")
-    public ResponseEntity<ResponseVO> deleteMember(@PathVariable(name="id") String id) {	
+    public ResponseEntity<ResponseVO> deleteMember(Authentication authentication,@PathVariable(name="id") String id) {	
     	try {
+    	//	PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
     		boolean isDeleted = memberService.deleteMember(id);
     		
         	if(isDeleted) {
